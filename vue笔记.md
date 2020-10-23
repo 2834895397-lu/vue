@@ -1,3 +1,35 @@
+# npm的几种安装方式的区别
+
+**npm install X:**
+
+- 会把X包安装到node_modules目录中
+- 不会修改package.json
+- 之后运行npm install命令时，不会自动安装X
+
+==**m install X –save:**==
+
+- 会把X包安装到node_modules目录中
+- 会在package.json的dependencies属性下添加X
+- 之后运行npm install命令时，会自动安装X到node_modules目录中
+- 之后运行npm install
+  –production或者注明NODE_ENV变量值为production时，会自动安装msbuild到node_modules目录中
+
+**npm install X –save-dev:**
+
+- 会把X包安装到node_modules目录中
+- 会在package.json的devDependencies属性下添加X
+- 之后运行npm install命令时，会自动安装X到node_modules目录中
+- 之后运行npm install
+  –production或者注明NODE_ENV变量值为production时，不会自动安装X到node_modules目录中
+
+**使用原则:**
+
+运行时需要用到的包使用–save，否则使用–save-dev。
+
+
+
+
+
 # 事件的触发
 
 ## 1. change事件
@@ -355,9 +387,106 @@ vue使用directive来自定义指令:
 
 #  vuex状态管理
 
+1. 安装: cnpm install vuex --save
+
+2. 引入和全局使用: 
+
+   ```javascript
+   import Vuex from 'vuex'
+   //为vue全局注入了$store属性, 后面就可以通过this.$store来获取这个Store对象
+   Vue.use(Vuex)
+   
+   const store = new Vuex.Store({....})
+   //在main.js中注册store就可以全局使用了, vue实例就可以通过this.$store来获取store, 组件可以直接通过$store来获取store实例
+   new Vue({
+     store,
+     el: '#app',
+     components: {App},
+     template: '<App/>'
+   })
+   
+   ```
+
+3. 具体配置:
+
+   ```javascript
+   const store = new Vuex.Store({
+     state: {
+       count: 0
+     },
+     mutations: {
+       //第一个参数a为回调参数, 是vuex的状态state, 第二个参数可以是组件传递过来的参数
+       increment(a) {
+         a.count++
+       }
+     },
+     //因为vuex都是响应式的数据, 所以也有getters属性, 它的回调参数是一个state对象, 旨在任何一个数据变化是, 都能在getter获取到对象的状态
+     getters: {
+       doubleCount(sate) {
+         return sate.count * 2
+       }
+     },
+   
+   
+     actions: {
+       /**
+        * @param object {
+        commit: ƒ boundCommit(type, payload, options)
+        dispatch: ƒ boundDispatch(type, payload)
+        getters: {}
+        rootGetters: {}
+        rootState: {__ob__: Observer}
+        state: {__ob__: Observer}
+        __proto__: Object}
+        由此可见, 回调参数为一个object对象, 所以我们只需要用解构的方式来获取我们所需要的数据而不用全部获取
+        */
+       increment({state}) {
+         setTimeout(() => {
+           state.count++
+         }, 3000)
+   
+       }
+     }
+   })
+   ```
+
+4. 使用: ==**所需要的响应式数据只需要放在计算属性中返回即可**==
+
+   ```javascript
+   //所需要的响应式数据只需要放在计算属性中返回即可
+   export default {
+       name: 'App',
+       computed:{
+         count(){
+           return this.$store.state.count
+         }
+       }
+     }
+   ```
+
+5. 具体调用和更改响应式数据:
+
+   ```javascript
+   <template>
+     <div id="app">
+       {{count}}
+       <br>
+       {{$store.getters.doubleCount}}
+       //我们commit到mutation时还可以传递自己的参数给mutation处理, mutation函数用第二个参数接收, 第一个参数固定为state对象回传, 本例不再演示
+       <button @click="$store.commit('increment')">count++</button>
+       <button @click="$store.dispatch('increment')">count++</button>
+     </div>
+   </template>
+   ```
+
+   
+
 ![image-20201022232600458](img/image-20201022232600458.png)
 
-**vuex的运行机制:** action一般是用与做异步处理的, 例如发ajax请求等等
+**vuex的运行机制:** action一般是用与做异步  的, 例如发ajax请求等等
 
 ![image-20201022232928622](img/image-20201022232928622.png)
 
+## vuex的核心概念
+
+state提供响应式数据,		getter提供获取响应式的值,		mutation触发state的改变,		action通过
