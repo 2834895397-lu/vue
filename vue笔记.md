@@ -492,3 +492,7 @@ vue使用directive来自定义指令:
 state提供响应式数据,		getter提供获取响应式的值,		mutation触发state的改变,		action通过驱动mutation来改变state的状态
 
 第一次提交
+
+
+
+第二次提交
