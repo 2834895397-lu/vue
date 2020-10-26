@@ -181,6 +181,16 @@ vue是单向数据流, 不是双向绑定, vue的双向绑定只不过是语法�
 
 ![image-20201022115031712](img/image-20201022115031712.png)
 
+
+
+## 引入组件使用异步加载的方式:
+
+```java
+component: () => import('xxxx')
+```
+
+
+
 ---
 
 ###### 使用组件时传递了一个没有声明的属性:
@@ -489,20 +499,302 @@ vue使用directive来自定义指令:
 
 ## vuex的核心概念
 
-state提供响应式数据,		getter提供获取响应式的值,		mutation触发state的改变,		action通过驱动mutation来改变state的状态
+state提供响应式数据,		getter提供获取响应式的值,		mutation触发state的改变,		action通过驱动mutation来改变state的状态:
 
-第一次提交
+![image-20201025121330490](img/image-20201025121330490.png)
 
+底层原理:
 
+![image-20201025121450273](img/image-20201025121450273.png)
 
-第二次提交
-
-测试提交
-
-
+# vuex的扩展
 
 
 
 
 
-第三次提交
+# vueRouter
+
+**使用方式:**
+
+![image-20201025142806876](img/image-20201025142806876.png)
+
+###  路由的配置:
+
+```javascript
+import Router from 'vue-router'
+//为vm对象注入全局的$router属性
+Vue.use(Router);
+var router = new Router({
+  //n个路由
+  routes: [
+    {
+      path: '/home',
+      component: Home,
+      children: [
+        {
+          path: '/home/news',//path最左边的斜杠永远代表根路径, 所以子路由建议不写斜杠了, 或者写了斜杠就写全称路径
+          component: News
+        },
+        {
+          path: 'message',//简化写法
+          component: Message,
+          children:[
+            {
+              path: 'detail/:id',
+              component: MessageDetail
+            }
+          ]
+        },
+        {
+          //子路由默认显示哪个组件
+          path: '/',
+          redirect: '/home/news'
+
+        }
+      ]
+    },
+    {
+      path: '/about',
+      component: About
+    },
+    {
+      path: '/',
+      redirect: '/about'
+    }
+  ]
+})
+
+//在vue中使用:
+new Vue({
+  el: '#app',
+  //使用路由
+  router,
+  components: { App },
+  template: '<App/>'
+})
+
+```
+
+### 使用路由:
+
+```javascript
+     <router-link to="/about">About</router-link>
+ 	 <router-view></router-view>
+```
+
+
+
+### 配置路由404页面
+
+在路由配置的最后面的path使用*通配符来配置, 当前面的路由都没有匹配上的时候就会走该页面:
+
+**{**
+
+**path: '*'**
+
+**name: '404'**
+
+**component: Not Found**
+
+**}**
+
+---
+
+## 路由的动画
+
+路由动画的效果: 当我们点击跳转路由时, 顶部导航栏会出现进度条
+
+如何使用配置?
+
+1. 安装nprogress插件:
+
+   `cnpm install nprogress --save`
+
+2. 在router中引入该插件和样式:
+
+   ```javascript
+   import NProgress from 'nprogress'
+   import 'nprogress/nprogress.css'
+   ```
+
+3. **使用: 在router开始遍历(寻找目标路由组件)和结束遍历的时候使用进度条**
+
+   ```javascript
+   const router = new Router({...})
+   /**
+    * to 将要去的路由
+    * from: 当前路由
+    * next: 调用next之后才会继续往下走, 在next之前可以做自己的逻辑判断
+    */
+   router.beforeEach((to, from, next) => {
+     //启动进度条
+     NProgress.start();
+     next();
+   });
+   router.afterEach(() => {
+     //进度条结束
+     NProgress.done();
+   })
+   ```
+
+4. 最后把router实例暴露出去:
+
+   `export default router;`
+
+
+
+
+
+
+
+## 路由的传参:
+
+### 方式一:
+
+1. 定义路由时使用**:占位符**:  
+
+   ```javascript
+    path: 'message',//简化写法
+             component: Message,
+             children:[
+               {
+                 path: 'detail/:id',
+                 component: MessageDetail
+               }
+             ]
+   ```
+
+2. ```javascript
+    <router-link :to="'/home/message/detail/'+ message.id">{{message.title}}</router-link>
+   ```
+
+3. 路由的目标组件使用params来接收:
+
+   ```javascript
+    const id = this.$route.params.id
+   ```
+
+
+
+---
+
+
+
+### 方式二:
+
+1. 使用标签传值
+
+```javascript
+  <router-view msg="abc"></router-view>
+```
+
+2. 路由的目标组件接收:
+
+   ```javascript
+    export default {
+       props:{
+         msg: String
+       },
+     }
+   ```
+
+   
+
+#### 自定义激活的路由的class属性
+
+![image-20201025153341244](img/image-20201025153341244.png)
+
+激活的路由会自动添加一个class属性: ==**class='router-link-active'**==, 所以我们可以根据这个class自定义激活路由的样式, 甚至可以在index.html中定义路由的全局样式
+
+#### 路由组件的渲染(挂载):
+
+1. 用户点击router-view的情况: 会在当前点击页的router-view标签进行挂在
+2. 用户通过导航栏直接访问: 会挂在到访问的路由的组件的父路由的组件的router-view标签中
+3. 这两种方式的效果都是一致的
+
+
+
+#### 路由的缓存
+
+**当切换到其他路由时, 默认是不会保存原来的路由状态, 可以使用<keep-alive>来包裹<router-view>以达到不销毁路由对象的效果:**
+
+### 一 ，缓存全部路由
+
+```javascript
+在router-view外包裹keep-alive
+例： 
+	<keep-alive>
+      <router-view></router-view>
+    </keep-alive>
+```
+
+### 二 ，指定路由缓存
+
+```javascript
+使用  include
+<keep-alive include="该路由的name名称">
+  <router-view></router-view>
+</keep-alive>
+```
+
+### 三，存在多个路由时，想缓存部分路由
+
+```javascript
+使用 meta
+在路由中添加下面属性  
+    meta: {keepAlive: true // 缓存}
+    meta: {keepAlive:false // 不缓存 }
+    例：
+    	 {
+	          path:'/Distribution',
+	          name:'Distribution',
+	          component: Distribution,
+	          meta: {keepAlive: true // 缓存}
+		 }
+然后在页面  
+	<keep-alive >
+		//当前进入的路由 meta里面 keepAlive为true时走这里
+      <router-view v-if="$route.meta.keepAlive"></router-view>
+    </keep-alive>
+    
+    //当前进入的路由 meta里面 keepAlive为false时走这里 下面 if 判断进行了取反处理
+    <router-view v-if="!$route.meta.keepAlive"></router-view>
+```
+
+#### 路由的常用api
+
+![image-20201025153925467](img/image-20201025153925467.png)
+
+5. **js方式来跳转路由: window.location = url**
+
+
+
+#### 路由的类型
+
+**hash模式:  超链接中带#号           history模式超链接中不到#号**              
+
+![image-20201026085023864](img/image-20201026085023864.png)
+
+​							==**更改路由类型: 在new路由的时候可以指定路由的模式mode:**==
+
+![image-20201026085246659](img/image-20201026085246659.png)
+
+
+
+
+
+# ant-design-vue专题
+
+组件的引入:
+
+```javascript
+import Ant from 'ant-design-vue'
+//使用css
+import 'ant-design-vue/dist/antd.css'
+
+Vue.use(Ant)
+```
+
+
+
