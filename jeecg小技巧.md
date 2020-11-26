@@ -150,3 +150,43 @@ BeanUtils.copyProperties(matlInOrderPage, matlInOrder);
 
 
 
+@transitional注解: 不会马上操作数据库, 而是直接结果没有异常然后再一次性操作数据库, 所以在@transitional的方法里面不能马上直接看到数据库数据的变化, 所以, 如果是先根据查询到的结果再改变数据库的数据的话, 不要在此方法上标注此注解
+
+
+
+前端传过来的记录有id, 但是子记录的外键没有存主记录的主键
+
+
+
+# 内嵌表生成的弹框失效
+
+==**将destFields属性改成控件对用的key就行了, orgFields是弹框查询出来的字段:**==
+
+```json
+{
+  title: '库存地',
+  key: 'tbdNodeId',
+  type: FormTypes.select,
+  dictCode:"tbd_node,name,id",
+  width:"200px",
+  placeholder: '请输入${title}',
+  defaultValue: '',
+ },
+{
+  title: '凭证单号（采购订单明细表ID）',
+  key: 'voucherId',
+  type: FormTypes.popup,
+  popupCode:"tmm_order_dtl",
+  destFields:"voucherId,tbdNodeId",
+  orgFields:"id,tbd_material_id",
+  width:"200px",
+  placeholder: '请输入${title}',
+  defaultValue: '',
+},
+```
+
+
+
+# popup弹框
+
+==**生成代码之后要修改弹框的内容, 直接修改在线表单的报表配置就行了, 生成的代码也是生效的**==
