@@ -10,8 +10,6 @@
 
 
 
-
-
 # npm的几种安装方式的区别
 
 **npm install X:**
@@ -421,7 +419,13 @@ vue使用directive来自定义指令:
 
 
 
+# 获取dom上挂载之后的数据:
 
+==**vm.$nextTick(function(){**==
+
+......
+
+==**})**==
 
 #  vuex状态管理
 
@@ -687,7 +691,7 @@ new Vue({
              component: Message,
              children:[
                {
-                 path: 'detail/:id',
+                 path: 'detail/:id',	//params.id获取值
                  component: MessageDetail
                }
              ]
@@ -831,6 +835,230 @@ new Vue({
 ![image-20201026085246659](img/image-20201026085246659.png)
 
 
+
+
+
+
+
+# mixins混入
+
+我们先来看看vue官方是怎么介绍的
+
+混入 (mixin) 提供了一种非常灵活的方式，来分发 Vue 组件中的可复用功能。一个混入对象可以包含任意组件选项。当组件使用混入对象时，所有混入对象的选项将被“混合”进入该组件本身的选项。
+
+官方文档说的很详细，通俗易懂的话来说一个.vue文件由template，script，style组成，混入的方法可以把mixin这个对象和.vue文件的script里面的内容“混入”（mixin对象的结构和.vue的script里面的结构一样），既此组件既可以调用组件内部的script，也可以调用混入对象。
+
+## 场景运用：
+
+有两个非常相似的组件，他们的基本功能是一样的，但他们之间又存在着足够的差异性。他们可能会公用一部分业务逻辑，但是他们的页面结构又不相同。这个时候就可以使用mixin来让代码复用。（类似于JS库，暴露出来的方法达到函数复用的效果。又区别于JS库，它继承了vue中script所有对象，包括生命周期，data，methods）
+
+## 话不多说请看基础实例：
+
+![img](https:////upload-images.jianshu.io/upload_images/17849217-3cd4a6a7145bcf38.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/364/format/webp)
+
+这是demo的文件结构
+
+**写在mixin.js**
+
+```
+const mixin= {
+    data() {
+        return {
+            name: '初始名字：张三',
+            mixinMsg: 'mixinMsg'
+        };
+    },
+    methods: {
+        // 获取mixin中的msg
+        getMixinMsg() {
+            alert(
+                '我是mixin.js中的getmsg方法，mixinmsg的数据是' + this.mixinMsg
+            );
+        },
+        // 获取home中的homeMsg
+        getHomeMsg() {
+            alert(
+                '我是mixin.js中的getHomeMsg方法，HomeMsg的数据是' + this.homeMsg
+            );
+        }
+    },
+    created() {
+        alert('在mixin中vue的data、生命周期、方法等都可以使用');
+    }
+};
+
+export default mixin;
+```
+
+mixin中，暴露一个常数Vrbtmixin ，Vrbtmixin 是一个对象，里面的结构和.vue文件的script相同
+
+**写在home.vue中**
+
+```
+<template>
+  <transition name="fade">
+    <div class="wrap">
+      <h1>Home页面</h1>
+      <h3 @click="goRule">跳转路由</h3>
+      <!--主要内容-->
+      <div class="content">
+        <div @click="getMixinData">1.获取mixin中的name</div>
+        <div @click="test">2.调用mixin.js中的getMixinMsg方法</div>
+        <div @click="getHomeMsg">3.获取home.vue中的homeMsg</div>
+        <div @click="changeMixinMsg">4.改变mixin中的name</div>
+      </div>
+    </div>
+  </transition>
+</template>
+<script>
+import mixin from '../js/mixin';
+export default {
+    mixins: [mixin],
+    data() {
+        return {
+            homeMsg: 'homeMsg'
+        };
+    },
+    methods: {
+        getMixinData() {
+            alert('mixin中的name为：' + this.name);
+        },
+        test() {
+            this.getMixinMsg();
+        },
+        changeMixinMsg() {
+            this.name = '李老二';
+            alert('mixin中的name改变为：' + this.name);
+        },
+        goRule() {
+            this.$router.push('/rule');
+        }
+    },
+    created() {}
+};
+</script>
+<style lang="less" scoped>
+img {
+    opacity: 0;
+}
+.wrap {
+    // background-color: white;
+    .content {
+        div {
+            height: 1rem;
+            // width: 1rem;
+            background-color: aqua;
+            margin-top: 0.4rem;
+            text-align: center;
+            line-height: 1rem;
+        }
+    }
+}
+</style>
+```
+
+引入mixin.js，然后注册 mixins: [mixin],
+
+**写在rule.vue中**
+
+```
+<template>
+  <transition name="fade">
+    <div class="wrap">
+      <!--主要内容-->
+      <div class="content">
+        <div @click="getMixinData">获取mixin.js中的name</div>
+      </div>
+    </div>
+  </transition>
+</template>
+<script>
+import mixin from '../js/mixin';
+export default {
+    mixins: [mixin],
+    name: 'zt',
+    data() {
+        return {
+            homeMsg: 'homeMsg'
+        };
+    },
+    methods: {
+        getMixinData() {
+            alert('mixin中的name为：' + this.name);
+        }
+    }
+};
+</script>
+<style lang="less" scoped>
+.wrap {
+    // background-color: white;
+    .content {
+        div {
+            height: 1rem;
+            // width: 1rem;
+            background-color: yellowgreen;
+            margin-top: 0.4rem;
+            text-align: center;
+            line-height: 1rem;
+        }
+    }
+}
+</style>
+```
+
+我们这里让2个组件home.vue 和 rule.vue都混合了mixin.js，一会我们可以通过对比来证明2个组件混合了相同的mixin.js但是2个组件不是共用关系，他们彼此没有影响。
+
+## 效果
+
+我们在home页面中：
+
+
+
+![img](https:////upload-images.jianshu.io/upload_images/17849217-2fa3b51ba4bc0d19.gif?imageMogr2/auto-orient/strip%7CimageView2/2/w/700/format/webp)
+
+home页面生命周期，按钮1，按钮2的演示
+
+1.我们可以看到我们写在mixin.js中的生命周期created()已经调用
+ 2.点击第一个按钮，我们获取到了mixin.js中data中的name
+ 3.点击第二个按钮，我们调用到了mixin.js中的getMixinMsg方法
+
+![img](https:////upload-images.jianshu.io/upload_images/17849217-8db182f65dd82cc9.gif?imageMogr2/auto-orient/strip%7CimageView2/2/w/700/format/webp)
+
+点击第三个按钮
+
+![img](https:////upload-images.jianshu.io/upload_images/17849217-0199e50a37da6bf1.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/700/format/webp)
+
+mixin.js中
+
+1.这次我们第三个按钮是通过home.vue调用mixin.js的getHomeMsg方法，发现不但home.vue可以调用到mixin.js的数据和方法，mixin.js也可以调用home.vue的数据和方法。（更加理解“混入”）
+
+![img](https:////upload-images.jianshu.io/upload_images/17849217-761e9568c39b3774.gif?imageMogr2/auto-orient/strip%7CimageView2/2/w/700/format/webp)
+
+改变mixin.js的数据
+
+
+
+1.点击第四个按钮，我们改变了mixin.js中的name数据，再点击第一个按钮，发现数据已经改变。
+
+
+
+![img](https:////upload-images.jianshu.io/upload_images/17849217-4e38bfe41ed37c45.gif?imageMogr2/auto-orient/strip%7CimageView2/2/w/700/format/webp)
+
+跳转到rule组件后，mixin的name为初始（其实本身并不共用）
+
+
+ 1.我们先在home中改变mixin的name，然后我们调到rule页面，在rule页面获取到的mixin的name为初始名字
+**mixin混入就像共用的业务逻辑，可以混入到组件中去，但是组件之间不受影响**
+
+
+
+**注意：当本组件与mixin有同名方法或同名数据时，有先调用本组件的方法或数据，混入的部分失效**
+
+## 总结：
+
+其实这个demo就是想展示mixin的用法，需要一边结合代码一边看效果。主要还是一个“混入”的思想，理解了这个“混入”的思想，其实也很简单。就是代码中的相同业务，你把它剥离出来，封装后单独写个mixin，到需要用的组件时再混入进去。代码维护方便，复用率高，书写简洁。
+
+Mixin对于封装一小段想要复用的代码来讲是有用的。对你来说Mixin当然不是唯一可行的选择：比如说高阶组件就允许你组合相似函数，Mixin只是的一种实现方式。我喜欢Mixin，因为我不需要传递状态，但是这种模式当然也可能会被滥用，所以，仔细思考下哪种选择对你的应用最有意义吧！
 
 
 
