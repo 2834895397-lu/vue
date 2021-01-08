@@ -190,3 +190,9 @@ BeanUtils.copyProperties(matlInOrderPage, matlInOrder);
 # popup弹框
 
 ==**生成代码之后要修改弹框的内容, 直接修改在线表单的报表配置就行了, 生成的代码也是生效的**==
+
+
+
+# 多租户情况
+
+==**开启了多租户, 如果自己写sql, 如果是insert就不用加上租户id, 系统会自动加上租户id, 这个水有点深, 如果是选出来的东西再insert去其他表, 那么选出来的东西就必须把tenant_id一起选出来**==

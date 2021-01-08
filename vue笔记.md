@@ -401,6 +401,11 @@ vue使用directive来自定义指令:
 
 ![image-20201022205250736](img/image-20201022205250736.png)
 
+```
+this.$refs.component.name = 'jacklu'
+如果component实例中有name这个属性, 则直接复制'jacklu', 如果没有, 则新增一个name属性, 赋值为'jacklu'
+```
+
 
 
 # template和jsx
