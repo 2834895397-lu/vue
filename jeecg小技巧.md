@@ -196,3 +196,29 @@ BeanUtils.copyProperties(matlInOrderPage, matlInOrder);
 # 多租户情况
 
 ==**开启了多租户, 如果自己写sql, 如果是insert就不用加上租户id, 系统会自动加上租户id, 这个水有点深, 如果是选出来的东西再insert去其他表, 那么选出来的东西就必须把tenant_id一起选出来**==
+
+
+
+# j-date的初始值
+
+接收的是一个 字符串的值, 我们直接拿变量的值是拿不到的, 可以直接调用一个函数, 函数返回当前时间的字符串
+
+```vue
+ postingDateRules: {
+          rules: [{ required: true, message: '请选择过账日期!' }],
+          initialValue: this.getDate()
+        }
+        
+        
+  getDate() {
+      let date = new Date()
+      return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate()
+    },
+ 
+```
+
+
+
+# online在线表单的配置
+
+==**在新建在线表单的时候, 如果选了表类型为附表的话, 则页面属性的控件类型是比主表少很多的, 当我们的表是附表时, 可以先把表类型选成主表, 选择完成控件之后再选择表类型**==

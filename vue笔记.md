@@ -4,7 +4,7 @@
 2. $watch(): 监听想用是数据
 3. $data: 获取data
 4. $set(): 设置data
-5. $nextTick(fn):  及时获取更新的数据
+5. $nextTick(fn):  及时获取更新的数据, ==**在使用ref调用组件的属性或者方法时候, 一定要在nextTick中进行调用, 否则会出现莫名奇妙的问题**==
 6. $options: 获取vm中的所有信息, Vue构造函数中的{}就是options
 7. $mount(el): 使vm挂载
 
@@ -425,6 +425,8 @@ this.$refs.component.name = 'jacklu'
 
 
 # 获取dom上挂载之后的数据:
+
+==**在使用ref调用组件的属性或者方法时候, 一定要在nextTick中进行调用, 否则会出现莫名奇妙的问题**==
 
 ==**vm.$nextTick(function(){**==
 
@@ -1080,4 +1082,36 @@ Vue.use(Ant)
 ```
 
 
+
+# antd表单设置默认值
+
+在下面这个地方设置
+
+```javascript
+ <Form.Item>
+   {getFieldDecorator('username', {
+   	//这个地方
+      initialValue:'Tom',
+      rules: [{ required: true, message: '请输入你的用户名！'}],
+    })(
+      <Input
+        prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+        placeholder="Username"
+      />,
+    )}
+  </Form.Item>
+```
+
+注意antd表单设置默认值位置
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2019112019190445.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTU1MTQxMQ==,size_16,color_FFFFFF,t_70)
+方法二setFieldsValue
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20191120205116448.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTU1MTQxMQ==,size_16,color_FFFFFF,t_70)
+设置一组输入控件的值（注意：不要在 componentWillReceiveProps 内使用，否则会导致死循环)
+
+```javascript
+this.props.form.setFieldsValue({
+    username:"我是初始值"
+});
+```
 
