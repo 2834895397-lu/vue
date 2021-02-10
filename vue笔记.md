@@ -52,6 +52,14 @@ change事件会根据Input输入框的变化实时性来触发改事件
 
 
 
+> ```vue
+> this.$emit('update:visible', false)
+> ```
+>
+> **==改变父组件传递过来的visible属性为false==**
+
+
+
 # 插槽
 
 ### slot的新语法和旧语法:
